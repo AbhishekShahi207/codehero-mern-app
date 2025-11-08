@@ -2,12 +2,23 @@ import express from "express";
 import { ENV } from "./lib/env.js";
 import path from "path";
 import { dbconnect } from "./lib/db.js";
+import cors from "cors"
+import {serve} from "inngest/express";
+import {inngest} from "inngest";
 
 const app = express();
 
 const __dirname = path.resolve();
 console.log(__dirname);
 const PORT = ENV.PORT || 3001;
+
+//middlewares
+app.use(express.json())
+app.use(cors({origin:ENV.CLIENT_URL,credentials:true}))
+
+//inngest part
+app.use("api/inngest",serve({client:inngest,functions}))
+
 
 app.get("/hii", (req, res) => {
   res.status(200).json({ message: "Success" });
