@@ -5,6 +5,9 @@ import { dbconnect } from "./lib/db.js";
 import cors from "cors"
 import {serve} from "inngest/express";
 import {inngest,functions} from "./lib/inngest.js";
+import { clerkMiddleware } from '@clerk/express';
+import { protectRoute } from "./middleware/protectRoute.js";
+import chatRoutes from "./routes/chatRoutes.js"
 
 const app = express();
 
@@ -15,14 +18,26 @@ const PORT = ENV.PORT || 3001;
 //middlewares
 app.use(express.json())
 app.use(cors({origin:ENV.CLIENT_URL,credentials:true}))
+app.use(clerkMiddleware())//this adds auth field to request object :req.auth
+
+
+//Routes
+app.use("api/chat",chatRoutes)
+
+
 
 //inngest part
 app.use("/api/inngest",serve({client:inngest,functions}))
 
 
-app.get("/hii", (req, res) => {
-  res.status(200).json({ message: "Success" });
+
+app.get("/hello", (req, res) => {
+  res.status(200).json({ message: "hello" });
 });
+
+
+
+
 
 //deployement code
 if (ENV.NODE_ENV === "production") {
@@ -34,6 +49,8 @@ if (ENV.NODE_ENV === "production") {
     res.sendFile(path.join(__dirname, "../frontend", "dist", "index.html"));
   });
 }
+
+
 
 const startServer = async () => {
   try {
