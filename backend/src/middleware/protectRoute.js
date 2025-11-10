@@ -7,13 +7,13 @@ export const protectRoute=[
     async (req,res,next)=>{
         try {
             const clerkId = req.auth().userId
-            if(!clerkId) return res.status(401).json({msg:"Unauthorirzed-Invalid Token"})
+            if(!clerkId) return res.status(401).json({message:"Unauthorirzed-Invalid Token"})
 
                 //find user in db using clerkID
 
                 const user =await User.findOne({clerkId:clerkId})
 
-            if(!user) return res.status(404).json({msg:"User not found"})
+            if(!user) return res.status(404).json({message:"User not found"})
 
                 //attact user to every next user
                 req.user=user
