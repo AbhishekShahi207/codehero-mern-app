@@ -17,7 +17,7 @@ export const protectRoute=[
 
                 //attact user to every next user
                 req.user=user
-
+ 
                 next()
         } catch (error) {
             console.log('Error in protectRoute middlewares',error)
