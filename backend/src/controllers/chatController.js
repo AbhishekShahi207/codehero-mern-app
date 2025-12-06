@@ -4,7 +4,7 @@ import { chatClient } from "../lib/stream.js"
 export const getStreamToken=async(req,res)=>{
 
     try {
-        const token =chatClient.createToken(req.user.clerkId)//using clerkId instead of userID becasue thorugh inngest we passsed clerkId to stream  
+        const token =chatClient.createToken(req.user.clerkId)//using clerkId instead of mongo id  becasue thorugh inngest we passsed clerkId to stream  
 
         res.status(200).json({
             token,

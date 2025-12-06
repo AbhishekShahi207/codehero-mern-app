@@ -41,7 +41,11 @@ const deleteUserFromDB = inngest.createFunction(
         
         await User.deleteOne({clerkId:id})
 
-        await deleteUserFromDB(id.toString())
+       
+
+
+
+          await deleteStreamUser(id.toString());
     }
 )
 
