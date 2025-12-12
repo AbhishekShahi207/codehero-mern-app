@@ -26,7 +26,7 @@ export async function createSession(req, res) {
     });
 
     //create a stream video call
-    await streamClient.video.call("defaut", callId).getOrCreate({
+    await streamClient.video.call("default", callId).getOrCreate({
       data: {
         created_by_id: clerkId,
         custom: { problem, difficulty, sessionId: session._id.toString() },
@@ -43,15 +43,17 @@ export async function createSession(req, res) {
 
     res.status(201).json({ session });
   } catch (error) {
-    console.log("Error in createSession controller");
+    console.log("Error in createSession controller",error);
     res.status(500).json({ message: "Internal Server Error" });
   }
 }
 
 export async function getActiveSessions(req, res) {
   try {
+  
     const sessions = await Session.find({ status: "active" })
       .populate("host", "name profileImage email clerkId")
+      .populate("participant", "name profileImage email clerkId")
       .sort({ createdAt: -1 })
       .limit(20);
 
@@ -74,7 +76,7 @@ export async function getMyRecentSessions(req, res) {
       .sort({ createdAt: -1 })
       .limit(20);
 
-    req.status(200).json({ sessions });
+    res.status(200).json({ sessions });
   } catch (error) {
     console.log("Error in getMyRecentSessions COntorller", error);
     res.status(500).json("Internal Server Error");
@@ -86,7 +88,7 @@ export async function getSessionById(req, res) {
     const { id } = req.params;
     const session = await Session.findById(id)
       .populate("host", "name email profileImage clerkId")
-      .populate("particiant", "name email profileImage clerkId");
+      .populate("participant", "name email profileImage clerkId");
 
     if (!session) return res.status(404).json({ message: "Session Not found" });
 
