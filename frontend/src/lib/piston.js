@@ -1,7 +1,7 @@
-// Piston API is a service for code execution
-
+// Piston API is a service for remote code execution
 const PISTON_API = "https://emkc.org/api/v2/piston";
 
+// Supported languages and versions
 const LANGUAGE_VERSIONS = {
   javascript: { language: "javascript", version: "18.15.0" },
   python: { language: "python", version: "3.10.0" },
@@ -9,15 +9,17 @@ const LANGUAGE_VERSIONS = {
 };
 
 /**
- * @param {string} language - programming language
- * @param {string} code - source code to executed
- * @returns {Promise<{success:boolean, output?:string, error?: string}>}
+ * Executes source code using the Piston API
+ *
+ * @param {string} language - Programming language key (javascript | python | java)
+ * @param {string} code - Source code to execute
+ * @returns {Promise<{success: boolean, output?: string, error?: string}>}
  */
 export async function executeCode(language, code) {
   try {
-    const languageConfig = LANGUAGE_VERSIONS[language];
+    const config = LANGUAGE_VERSIONS[language];
 
-    if (!languageConfig) {
+    if (!config) {
       return {
         success: false,
         error: `Unsupported language: ${language}`,
@@ -30,8 +32,8 @@ export async function executeCode(language, code) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        language: languageConfig.language,
-        version: languageConfig.version,
+        language: config.language,
+        version: config.version,
         files: [
           {
             name: `main.${getFileExtension(language)}`,
@@ -44,33 +46,28 @@ export async function executeCode(language, code) {
     if (!response.ok) {
       return {
         success: false,
-        error: `HTTP error! status: ${response.status}`,
+        error: `HTTP Error: ${response.status}`,
       };
     }
 
     const data = await response.json();
-const output = data.run.output?.trim() ?? "";
-const stderr = data.run.stderr?.trim() ?? "";
 
-if (!stderr && !output) {
-  return {
-    success: false,
-    output: output,
-    error: "Runtime error or program produced no output."
-  };
-}
+    // IMPORTANT: Piston returns stdout & stderr separately
+    const stdout = data.run?.stdout?.trim() || "";
+    const stderr = data.run?.stderr?.trim() || "";
 
+    // If runtime error exists
     if (stderr) {
       return {
         success: false,
-        output: output,
+        output: stdout,
         error: stderr,
       };
     }
 
     return {
       success: true,
-      output: output || "No output",
+      output: stdout || "No output",
     };
   } catch (error) {
     return {
@@ -80,6 +77,9 @@ if (!stderr && !output) {
   }
 }
 
+/**
+ * Returns correct file extension based on language
+ */
 function getFileExtension(language) {
   const extensions = {
     javascript: "js",
